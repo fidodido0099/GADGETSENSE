@@ -1,0 +1,8 @@
+gradio>=4.0
+fastapi
+uvicorn[standard]
+transformers>=4.40
+torch
+bitsandbytes
+accelerate
+httpx
