@@ -78,13 +78,13 @@ When making purchase decisions, buyers spend hours watching long-form reviews wh
 
 ---
 
-## 📂 Repository Structure
+## 📂 Project Structure
 
 gadgetsense/
-├── app.py              # FastAPI server backend + Gradio UI frontend entry point
-├── sentiment.py        # NLP pipeline (Zero-shot filter, ModernBERT classifier, Gemma-3 synthesis)
-├── youtube_service.py  # Asynchronous Piped/YouTube API scraper & text sanitization engine
-├── requirements.txt    # Python package dependencies
+├── app.py              # FastAPI server + Gradio web interface entry point
+├── sentiment.py        # ModernBERT zero-shot filter, classification & Gemma-3 synthesis
+├── youtube_service.py  # YouTube comment scraper with Piped failover & text cleaning
+├── requirements.txt    # Python dependencies
 └── README.md           # Project documentation
 
 ---
