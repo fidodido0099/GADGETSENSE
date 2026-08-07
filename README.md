@@ -1,116 +1,149 @@
-# ⚡ GadgetSense AI
+# GadgetSense AI: View-Weighted Sentiment Analysis Engine
 
-> **Because the real review is always in the comments.**
-
-GadgetSense is an AI-powered sentiment analysis platform designed for tech products. By aggregating viewer comments from YouTube reviews, GadgetSense filters out spam, runs multi-stage NLP classification, and calculates a weighted sentiment score (0–100) alongside actionable pros, cons, and buyer verdicts.
+GadgetSense is an end-to-end NLP intelligence pipeline that quantifies consumer sentiment from YouTube review comment sections. It filters out irrelevancies, classifies sentiment using a fine-tuned encoder, and synthesizes structured buying recommendations using a 4-bit quantized Causal LLM.
 
 ---
 
-## 🌟 Key Features
+## 🏗️ System Architecture
 
-* **Automated Data Scraping & Filtering**: Retrieves review videos and comments via multi-instance fallback APIs (Piped & YouTube Data API v3).
-* **Multi-Stage AI Pipeline**:
-  * **Zero-Shot Filtering**: Uses `ModernBERT-zeroshot` to remove non-product chatter (creator praise, shipping complaints, editing talk).
-  * **Fine-Tuned Classification**: Classifies product-specific feedback (Positive, Neutral, Negative) using fine-tuned `ModernBERT`.
-  * **LLM Insights Synthesis**: Employs `google/gemma-3-1b-it` (4-bit quantized) to summarize key pros, cons, and an overall buyer recommendation ("BUY", "WAIT", "AVOID").
-* **Weighted Sentiment Index**: Weights comments based on review video popularity (log10(views)) to deliver accurate aggregate scores.
-* **Dual Interface**:
-  * **FastAPI Backend**: Exposes REST endpoints (`/api/analyze`, `/api/health`) for API integrations.
-  * **Interactive Gradio UI**: Presents real-time gauge visualizers, sentiment breakdown metrics, and video source lists.
+                              +-----------------------+
+                              | YouTube Video Comments|
+                              +-----------+-----------+
+                                          |
+                                          v
+                              +-----------------------+
+                              | Text Cleaning Pipeline|
+                              | (HTML, Regex, Dupes)  |
+                              +-----------+-----------+
+                                          |
+                                          v
+                              +-----------------------+
+                              |  Zero-Shot Bouncer    |
+                              |  (ModernBERT-v2.0)    |
+                              +-----------+-----------+
+                                          |
+                                          v
+                              +-----------------------+
+                              |  Sentiment Engine     |
+                              | (Fine-Tuned ModernBERT|
+                              +-----------+-----------+
+                                          |
+                                          v
+                              +-----------------------+
+                              | Weighted Score Engine |
+                              |  Score Calculation    |
+                              +-----------+-----------+
+                                          |
+                                          v
+                              +-----------------------+
+                              | Synthesis & Report    |
+                              |  (Gemma-3-1b-it 4-Bit)|
+                              +-----------------------+
 
 ---
 
-## 📂 Project Structure
+## 🔬 Tech Stack & ML Methodology
+
+### Data Ingestion & Fallback Layer
+* Primary API: Multi-instance Piped API rotation for comment scraping without rate limits.
+* Secondary Fallback: YouTube Data API v3 (`google-api-python-client`).
+* Cleaning Filters: Regex stripping for URLs, HTML entities, length boundaries (5-500 characters), and emoji-only noise.
+
+### NLP Pipeline Stages
+1. Filtering (`MoritzLaurer/ModernBERT-base-zeroshot-v2.0`): Filters non-product comments (creator praise, video editing, delivery feedback) with a confidence threshold >= 0.70.
+2. Classification (`karlsefni/gadgetsense-modernbert`): Batched inferencing (Batch Size = 64) classifying comments into Positive, Neutral, or Negative labels.
+3. Weighted Scoring Index: Calculates aggregate product score using logarithmic view weighting:
+
+   Score = ((Sum(Sentiment_i * log10(Views_i + 1)) / Sum(log10(Views_i + 1))) + 1) / 2 * 100
+
+4. Synthesis (`google/gemma-3-1b-it`): Generates structured JSON reports (5 distinct Pros, 5 Cons, and a 2-3 sentence Verdict) using NF4 BitsAndBytes 4-bit quantization.
+
+---
+
+## 📂 Repository Structure
 
 gadgetsense/
-├── app.py              # FastAPI server + Gradio web interface entry point
-├── sentiment.py        # ModernBERT zero-shot filter, classification & Gemma-3 synthesis
-├── youtube_service.py  # YouTube comment scraper with Piped failover & text cleaning
-├── requirements.txt    # Python dependencies
-└── README.md           # Project documentation
+├── app.py              # FastAPI server + Gradio web application entry point
+├── sentiment.py        # Inference pipeline (Zero-Shot, ModernBERT, Gemma-3)
+├── youtube_service.py  # Asynchronous Piped/YouTube API client & text cleaner
+├── requirements.txt    # Fixed dependency lock file
+└── README.md           # Technical documentation
 
 ---
 
-## 🛠️ Installation & Quickstart
+## ⚙️ Technical Requirements & Dependencies
 
-### Prerequisites
-
-* Python 3.10+
-* An NVIDIA GPU with CUDA support is recommended for execution (e.g., T4/V100/A100).
-* A Hugging Face user access token.
+* Hardware: NVIDIA GPU with CUDA support (Minimum 8 GB VRAM for Gemma-3-1b 4-bit + ModernBERT inference).
+* Runtime: Python 3.10+
+* Key Libraries: `transformers`, `torch`, `bitsandbytes`, `accelerate`, `fastapi`, `gradio`, `httpx`
 
 ---
 
-### Option 1: Running in Google Colab (Recommended for Free GPU)
+## ⚡ Quickstart Guide
 
-1. Mount Google Drive & Navigate to Workspace:
+### Running in Google Colab
+
+1. Mount Drive & Navigate to Repository:
    from google.colab import drive
    drive.mount('/content/drive')
-
    %cd /content/drive/MyDrive/Colab_Notebooks/gadgetsense-master
 
-2. Install Required Packages:
+2. Install Dependencies:
    !pip install -q gradio fastapi uvicorn transformers torch bitsandbytes accelerate httpx
 
-3. Authenticate Hugging Face Token:
+3. Authenticate Hugging Face:
    from huggingface_hub import login
-   login(token="YOUR_HUGGINGFACE_TOKEN")
+   login(token="YOUR_HF_TOKEN")
 
-4. Launch the Application:
+4. Launch Server & UI:
    !python app.py
 
-   > Follow the generated public Gradio link (https://xxxx.gradio.live) to open the web application.
-
 ---
 
-### Option 2: Local Installation (Linux / Windows / macOS)
+### Local Setup
 
-1. Clone the Repository:
+1. Clone & Set Up Environment:
    git clone https://github.com/YOUR_USERNAME/gadgetsense.git
    cd gadgetsense
-
-2. Create and Activate a Virtual Environment:
    python -m venv venv
-   # On Linux/macOS:
-   source venv/bin/activate
-   # On Windows:
-   venv\Scripts\activate
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-3. Install Dependencies:
+2. Install Packages & Login:
    pip install -r requirements.txt
-
-4. Log into Hugging Face CLI:
    huggingface-cli login
 
-5. Run the Server:
+3. Optional Environment Variables:
+   export YOUTUBE_API_KEY="your_optional_youtube_v3_key"
+
+4. Execute:
    python app.py
 
-   Open http://localhost:7860 in your web browser.
-
 ---
 
-## 🚀 API Endpoint Usage
-
-GadgetSense exposes API endpoints via FastAPI alongside the web UI.
+## 📡 API Specification
 
 ### Health Check
-GET /api/health
+* GET `/api/health`
+* Response: `{"status": "ok"}`
 
-Response:
-{
-  "status": "ok"
-}
-
-### Analyze Product
-POST /api/analyze
-Content-Type: application/json
-
-{
-  "gadget": "Sony WH-1000XM5"
-}
+### Sentiment Analysis Query
+* POST `/api/analyze`
+* Payload:
+  {
+    "gadget": "MacBook Pro M3"
+  }
+* Response Schema:
+  {
+    "score": 82,
+    "total_comments": 420,
+    "positive_count": 310,
+    "neutral_count": 70,
+    "negative_count": 40,
+    "pros": ["Display Quality", "Battery Efficiency"],
+    "cons": ["High Base Price", "Limited Port Selection"],
+    "verdict": "BUY",
+    "verdict_summary": "Highly favored for performance and display upgrades...",
+    "videos": [...]
+  }
 
 ---
-
-## 📜 License
-
-Distributed under the MIT License. See LICENSE for more details.
