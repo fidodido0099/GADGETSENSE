@@ -1,3 +1,4 @@
+Plaintext
 # ⚡ GadgetSense AI: End-to-End Sentiment Intelligence Engine
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
@@ -23,7 +24,8 @@ When making purchase decisions, buyers spend hours watching long-form reviews wh
 ---
 
 ## 🏗️ System Architecture & Data Pipeline
-+-----------------------+
+
+                              +-----------------------+
                               | YouTube Video Comments|
                               +-----------+-----------+
                                           |
@@ -173,3 +175,7 @@ Response:
 }
 
 ---
+
+## 📜 License
+
+Distributed under the MIT License. See LICENSE for details.
