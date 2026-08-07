@@ -1,28 +1,26 @@
 # ⚡ GadgetSense AI
+
 > **Because the real review is always in the comments.**
- GadgetSense is an AI-powered sentiment analysis platform designed for tech products.
- By aggregating viewer comments from YouTube reviews, GadgetSense filters out spam, runs multi-stage NLP classification,
- and calculates a weighted sentiment score (0–100) alongside actionable pros, cons, and buyer verdicts.
 
-# 🌟 Key Features
+GadgetSense is an AI-powered sentiment analysis platform designed for tech products. By aggregating viewer comments from YouTube reviews, GadgetSense filters out spam, runs multi-stage NLP classification, and calculates a weighted sentiment score (0–100) alongside actionable pros, cons, and buyer verdicts.
 
-Automated Data Scraping & Filtering
-Retrieves review videos and comments via multi-instance fallback APIs (Piped & YouTube Data API v3).
+---
 
-Multi-Stage AI Pipeline
-Uses ModernBERT-zeroshot to remove non-product chatter (creator praise, shipping complaints, editing talk). 
-Classifies product-specific feedback (Positive, Neutral, Negative) using fine-tuned ModernBERT. Employs google/gemma-3-1b-it (4-bit quantized) to summarize
-key pros, cons, and an overall buyer recommendation ("BUY", "WAIT", "AVOID").
+## 🌟 Key Features
 
-Weighted Sentiment Index
-Weights comments based on review video popularity (log10(views)) to deliver accurate aggregate scores.
+* **Automated Data Scraping & Filtering**: Retrieves review videos and comments via multi-instance fallback APIs (Piped & YouTube Data API v3).
+* **Multi-Stage AI Pipeline**:
+  * **Zero-Shot Filtering**: Uses `ModernBERT-zeroshot` to remove non-product chatter (creator praise, shipping complaints, editing talk).
+  * **Fine-Tuned Classification**: Classifies product-specific feedback (Positive, Neutral, Negative) using fine-tuned `ModernBERT`.
+  * **LLM Insights Synthesis**: Employs `google/gemma-3-1b-it` (4-bit quantized) to summarize key pros, cons, and an overall buyer recommendation ("BUY", "WAIT", "AVOID").
+* **Weighted Sentiment Index**: Weights comments based on review video popularity (log10(views)) to deliver accurate aggregate scores.
+* **Dual Interface**:
+  * **FastAPI Backend**: Exposes REST endpoints (`/api/analyze`, `/api/health`) for API integrations.
+  * **Interactive Gradio UI**: Presents real-time gauge visualizers, sentiment breakdown metrics, and video source lists.
 
-Dual Interface
-FastAPI Backend exposes REST endpoints (/api/analyze, /api/health) for API integrations. Interactive Gradio UI presents real-time gauge visualizers, 
-sentiment breakdown metrics, and video source lists.
+---
 
-
-#📂 Project Structure
+## 📂 Project Structure
 
 gadgetsense/
 ├── app.py              # FastAPI server + Gradio web interface entry point
@@ -31,18 +29,19 @@ gadgetsense/
 ├── requirements.txt    # Python dependencies
 └── README.md           # Project documentation
 
+---
 
-# 🛠️ Installation & Quickstart
+## 🛠️ Installation & Quickstart
 
-## Prerequisites
+### Prerequisites
 
-Python 3.10+
-An NVIDIA GPU with CUDA support is recommended for execution (e.g., T4/V100/A100).
-A Hugging Face user access token.
+* Python 3.10+
+* An NVIDIA GPU with CUDA support is recommended for execution (e.g., T4/V100/A100).
+* A Hugging Face user access token.
 
 ---
 
-## Option 1: Running in Google Colab (Recommended for Free GPU)
+### Option 1: Running in Google Colab (Recommended for Free GPU)
 
 1. Mount Google Drive & Navigate to Workspace:
    from google.colab import drive
@@ -112,3 +111,6 @@ Content-Type: application/json
 
 ---
 
+## 📜 License
+
+Distributed under the MIT License. See LICENSE for more details.
